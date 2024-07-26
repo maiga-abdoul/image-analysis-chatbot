@@ -210,7 +210,7 @@
     <div class="chat-container">
         <div class="chat-header">
             <button class="menu-button" onclick="openApiKeyWindow()">☰</button>
-            Image Analysis Chatbot
+            Image Analysis Chatbot: MAIGA
         </div>
 
         <div id="apiKeyWindow" class="modal">
@@ -240,6 +240,7 @@
         let stream = null;
         let isCameraOn = false;
         let capturedImageData = null;
+        let backCameraId = null;
 
         async function sendMessage() {
             const message = userInput.value.trim();
@@ -325,10 +326,25 @@
             }
         }
 
+        async function getBackCameraId() {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            console.log(devices)
+            const videoDevices = devices.filter(device => device.kind === 'videoinput');
+            // Assuming the first video device is the front camera and the second is the back camera
+            if (videoDevices.length > 1) {
+                backCameraId = videoDevices[1].deviceId;
+            }
+        }
+
         async function toggleCamera() {
             if (!isCameraOn) {
                 try {
-                    stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    if (backCameraId === null) {
+                        await getBackCameraId();
+                    }
+                    
+                    const constraints = backCameraId ? { video: { deviceId: backCameraId } } : { video: true };
+                    stream = await navigator.mediaDevices.getUserMedia(constraints);
                     cameraFeed.srcObject = stream;
                     cameraFeed.style.display = 'block';
                     cameraButton.style.backgroundColor = "#d9534f";
