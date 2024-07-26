@@ -327,36 +327,38 @@
         }
 
         async function getBackCameraId() {
-            const devices = await navigator.mediaDevices.enumerateDevices();
-            console.log(devices)
-            const videoDevices = devices.filter(device => device.kind === 'videoinput');
-            // Assuming the first video device is the front camera and the second is the back camera
-            if (videoDevices.length > 1) {
-                backCameraId = videoDevices[0].deviceId;
+              const devices = await navigator.mediaDevices.enumerateDevices();
+              const videoDevices = devices.filter(device => device.kind === 'videoinput');
+            
+              // Prioritize back camera based on facingMode
+              const backCamera = videoDevices.find(device => device.facingMode === 'environment');
+              if (backCamera) {
+                return backCamera.deviceId;
+              }
+            
+              // If no back camera found, return the first available video device
+              return videoDevices[0]?.deviceId || null;
             }
-        }
-
-        async function toggleCamera() {
-            if (!isCameraOn) {
+            
+            async function toggleCamera() {
+              if (!isCameraOn) {
                 try {
-                    if (backCameraId === null) {
-                        await getBackCameraId();
-                    }
-    
-                    const constraints = backCameraId ? { video: { deviceId: backCameraId } } : { video: true };
-                    stream = await navigator.mediaDevices.getUserMedia(constraints);
-                    cameraFeed.srcObject = stream;
-                    cameraFeed.style.display = 'block';
-                    cameraButton.style.backgroundColor = "#d9534f";
-                    isCameraOn = true;
+                  const backCameraId = await getBackCameraId();
+                  const constraints = backCameraId ? { video: { deviceId: backCameraId } } : { video: true };
+                  stream = await navigator.mediaDevices.getUserMedia(constraints);
+                  cameraFeed.srcObject = stream;
+                  cameraFeed.style.display = 'block';
+                  cameraButton.style.backgroundColor = "#d9534f";
+                  isCameraOn = true;
                 } catch (err) {
-                    console.error('Error accessing camera:', err);
-                    addMessage('System', 'Failed to access camera. Please check permissions.', 'bot-message');
+                  console.error('Error accessing camera:', err);
+                  addMessage('System', 'Failed to access camera. Please check permissions.', 'bot-message');
                 }
-            } else {
+              } else {
                 captureAndDisplayImage();
+              }
             }
-        }
+
 
         function captureAndDisplayImage() {
             const canvas = document.createElement('canvas');
