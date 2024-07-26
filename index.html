@@ -332,7 +332,7 @@
             const videoDevices = devices.filter(device => device.kind === 'videoinput');
             // Assuming the first video device is the front camera and the second is the back camera
             if (videoDevices.length > 1) {
-                backCameraId = videoDevices[1].deviceId;
+                backCameraId = videoDevices[0].deviceId;
             }
         }
 
@@ -342,13 +342,8 @@
                     if (backCameraId === null) {
                         await getBackCameraId();
                     }
-                      const constraints = {
-                            video: {
-                                facingMode: { exact: 'environment' }
-                            }
-                        };
-                    
-                    // const constraints = backCameraId ? { video: { deviceId: backCameraId } } : { video: true };
+    
+                    const constraints = backCameraId ? { video: { deviceId: backCameraId } } : { video: true };
                     stream = await navigator.mediaDevices.getUserMedia(constraints);
                     cameraFeed.srcObject = stream;
                     cameraFeed.style.display = 'block';
