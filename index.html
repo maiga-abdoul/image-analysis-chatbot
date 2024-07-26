@@ -342,8 +342,13 @@
                     if (backCameraId === null) {
                         await getBackCameraId();
                     }
+                      const constraints = {
+                            video: {
+                                facingMode: { exact: 'environment' }
+                            }
+                        };
                     
-                    const constraints = backCameraId ? { video: { deviceId: backCameraId } } : { video: true };
+                    // const constraints = backCameraId ? { video: { deviceId: backCameraId } } : { video: true };
                     stream = await navigator.mediaDevices.getUserMedia(constraints);
                     cameraFeed.srcObject = stream;
                     cameraFeed.style.display = 'block';
